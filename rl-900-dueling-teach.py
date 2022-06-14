@@ -21,7 +21,10 @@ from torch import nn
 # import json
 # import os
 
-from pfrl.agents.iqn import IQN, ImplicitQuantileQFunction, CosineBasisLinear
+try:
+    from pfrl.agents.iqn import IQN, ImplicitQuantileQFunction, CosineBasisLinear
+except:
+    from pfrl.agents.iqn import IQN, ImplicitQuantileQFunction, CosineBasisLinear
 from pfrl.explorers import LinearDecayEpsilonGreedy
 from pfrl.replay_buffers import ReplayBuffer
 
@@ -29,7 +32,7 @@ from pfrl.replay_buffers import ReplayBuffer
 
 def instantiate_environmnent():
     '''Instantiate Atari-SpaceInvaders Environment'''
-    env = gym.make("SpaceInvadersNoFrameskip-v4", render_mode='human')
+    env = gym.make("SpaceInvadersNoFrameskip-v4")
     env = AtariPreprocessing(env, grayscale_newaxis=False, frame_skip=4)
     env = FrameStack(env, 4)
     
@@ -352,7 +355,7 @@ if __name__ == '__main__':
         # Save model checkpoint
         if episode_count % 250 == 0 and episode_count > 200:
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            model.save(f"model-e{episode_count}-{timestamp}")
+            model.save(f"models/model-e{episode_count}-{timestamp}")
         
         episode_count += 1
 
