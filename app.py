@@ -1,27 +1,27 @@
 import streamlit as st
-from tensorflow import keras
 import tensorflow as tf
+from tensorflow import keras
 import numpy as np
 
 import gym
-# from gym import make
 from gym.wrappers.atari_preprocessing import AtariPreprocessing
 from gym.wrappers.frame_stack import FrameStack
 
 
-MODEL = r'some/path'
+LOCAL_MODEL = r'Student_Teacher_BestModel-ep500.h5'
 
 ### Helper functions
 
 def instantiate_environmnent():
     env = gym.make("SpaceInvadersNoFrameskip-v4")
-    env = AtariPreprocessing(env, grayscale_newaxis=True, frame_skip=4)
+    env = AtariPreprocessing(env, grayscale_newaxis=True, frame_skip=5)
     env = FrameStack(env, 4)
 
     return env
 
-def load_model(model=MODEL):
-    return keras.models.load_models(model)
+def load_model(model_h5=LOCAL_MODEL):
+    model = keras.models.load_model(model_h5)
+    return model
 
 ### End Helper Funtions
 
@@ -30,33 +30,63 @@ def load_model(model=MODEL):
 env = instantiate_environmnent()
 model = load_model()
 
-st.markdown('''# BIGCHAMP-900''')
 
-# import time
+st.set_page_config(layout='wide')
 
-# with st.empty():
-#      for seconds in range(60):
-#          st.write(f"⏳ {seconds} seconds have passed")
-#          time.sleep(1)
-#      st.write("✔️ 1 minute over!")
+### Sidebar
 
-episodes = st.number_input('Repeat how many times?')
+st.sidebar.title('BIGCHAMP-900')
 
-start_model = st.button('Play!')
+# st.sidebar.write('# N Games:')
+
+episodes = st.sidebar.number_input(label='N Games', value=10, step=1)
 
 
+start_model = st.sidebar.button('Start!')
+stop_model = st.sidebar.button('Stop!')
 
-for episode in range(1, episodes+1):
-    state = np.asarray(env.reset()).reshape(84, 84, 4)
-    done = False
-    score = 0
+# st.sidebar.write('## About')
 
-    while not done:
-        batch_state = tf.expand_dims(state, 0)
-        action = np.argmax(model.predict(batch_state)[0])
-        state, reward, done, info = env.step(action)
-        state_image = np.asarray(state)
-        with st.empty():
-            st.image(state_image)
-        state = np.asarray(state).reshape(84, 84, 4)
-        score += reward
+# st.sidebar.write('''
+#                 Bigchamp-900 was made using a Dueling Double DQN using Teacher-Student exploration from the IQN model.
+#                 ''')
+
+st.sidebar.markdown('''
+                Team:
+                - Alex Gribius
+                - Dan Hawkins
+                - Alberto Lopez Rueda
+                - Lorcan Rae
+
+                Special thanks:
+                - Oliver Giles
+                - Yassine Laghari
+                ''')
+
+### Main
+
+# st.title('BIGCHAMP-900')
+
+if start_model:
+
+    with st.empty():
+
+        for episode in range(1, episodes+1):
+            state = np.asarray(env.reset()).reshape(84, 84, 4)
+            done = False
+            score = 0
+
+            while not done:
+                batch_state = tf.expand_dims(state, 0)
+                action = np.argmax(model.predict(batch_state)[0])
+                state, reward, done, info = env.step(action)
+                state = np.asarray(state).reshape(84, 84, 4)
+                score += reward
+                st.image(env.render(mode='rgb_array'), width=420)
+
+                if stop_model:
+                    break
+
+else:
+    with st.empty():
+        pass
