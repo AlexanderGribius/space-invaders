@@ -6,8 +6,10 @@ import gym
 from gym.wrappers.atari_preprocessing import AtariPreprocessing
 from gym.wrappers.frame_stack import FrameStack
 
-
-from pfrl.agents.iqn import IQN, ImplicitQuantileQFunction, CosineBasisLinear
+try:
+    from pfrl.agents.iqn import IQN, ImplicitQuantileQFunction, CosineBasisLinear
+except:
+    from pfrl.agents.iqn import IQN, ImplicitQuantileQFunction, CosineBasisLinear
 from pfrl.explorers import LinearDecayEpsilonGreedy
 from pfrl.replay_buffers import ReplayBuffer
 
@@ -19,7 +21,7 @@ from torch import nn
 
 
 def instantiate_environmnent(game="SpaceInvaders-v4"):
-    env = gym.make('SpaceInvadersNoFrameskip-v4', render_mode='human')
+    env = gym.make('SpaceInvadersNoFrameskip-v4')
     env = AtariPreprocessing(env)
     env = FrameStack(env, 4)
     return env
